@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNimiqWallet } from '@/hooks/useNimiqWallet'
-import { useIdentity, useSearch } from '@/hooks/useIdentity'
+import { useIdentity, useSearch, usePosts, useEndorsements, useActivity } from '@/hooks/useIdentity'
 import { formatNimAddress } from '@/lib/nimiq'
 import Link from 'next/link'
 
@@ -10,6 +10,9 @@ export default function AppPage() {
   const { account, isConnecting, isAvailable, error: walletError, connect, isConnected } = useNimiqWallet()
   const { identity, isLoading: identityLoading, error: identityError, claimIdentity, checkAvailability } = useIdentity()
   const { results: searchResults, isLoading: searchLoading, search } = useSearch()
+  const { posts, isLoading: postsLoading, fetchPosts } = usePosts()
+  const { endorsements, isLoading: endorsementsLoading, fetchEndorsements } = useEndorsements()
+  const { activity, isLoading: activityLoading } = useActivity()
   
   const [handle, setHandle] = useState('')
   const [handleAvailable, setHandleAvailable] = useState<null | boolean>(null)
@@ -26,8 +29,11 @@ export default function AppPage() {
       setShowProfile(true)
       setShowSuccess(true)
       setTimeout(() => setShowSuccess(false), 3000)
+      // Fetch additional data for profile
+      fetchPosts(identity.handle)
+      fetchEndorsements(identity.handle, 'received')
     }
-  }, [identity])
+  }, [identity, fetchPosts, fetchEndorsements])
 
   const checkAvailabilityDebounced = useCallback(async (value: string) => {
     if (!value || value.length < 3) {
@@ -170,7 +176,21 @@ export default function AppPage() {
                 {identity.profile?.bio && (
                   <p className="text-muted-foreground mt-2">{identity.profile.bio}</p>
                 )}
+              
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <span className="badge badge-primary">Verified Wallet</span>
+                {(identity.reputation || 0) > 50 && (
+                  <span className="badge badge-success">Early Builder</span>
+                )}
+                {(identity.stats?.posts || 0) > 0 && (
+                  <span className="badge">Contributor</span>
+                )}
+                {(identity.stats?.endorsementsSent || 0) > 0 && (
+                  <span className="badge">Supporter</span>
+                )}
               </div>
+            </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/50">
@@ -203,7 +223,49 @@ export default function AppPage() {
 
             <div className="glass-strong p-6 rounded-2xl animate-slide-up">
               <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
-              <p className="text-muted-foreground/50 text-sm">Activity feed coming soon...</p>
+              {(postsLoading || endorsementsLoading) ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <svg className="animate-spin h-4 w-4 text-primary" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Loading activity...
+                </div>
+              ) : (posts.length === 0 && endorsements.length === 0) ? (
+                <p className="text-muted-foreground/50 text-sm">No activity yet. Create a post or receive an endorsement!</p>
+              ) : (
+                <div className="space-y-3">
+                  {/* Posts */}
+                  {posts.map((post) => (
+                    <div key={post.id} className="glass p-4 rounded-xl">
+                      <p className="text-foreground">{post.content}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                  {/* Endorsements received */}
+                  {endorsements.map((endorsement) => (
+                    <div key={endorsement.id} className="flex items-center justify-between glass p-4 rounded-xl hover:bg-glass-hover transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="avatar-sm font-mono">
+                          {endorsement.fromIdentity?.handle?.charAt(0).toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <p className="font-medium font-mono">{endorsement.fromIdentity?.fullHandle || 'Unknown'}</p>
+                          <p className="text-xs text-muted-foreground">endorsed you</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-primary font-medium">+{endorsement.amountNim.toFixed(5)} NIM</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(endorsement.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </main>

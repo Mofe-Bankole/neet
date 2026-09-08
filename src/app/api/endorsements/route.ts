@@ -4,18 +4,11 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { fromIdentityId, toIdentityId, amountNim, transactionHash } = body
+    const { fromIdentityId, fromWalletAddress, toIdentityId, amountNim, transactionHash } = body
 
-    if (!fromIdentityId || !toIdentityId || !amountNim || !transactionHash) {
+    if ((!fromIdentityId && !fromWalletAddress) || !toIdentityId || !amountNim || !transactionHash) {
       return NextResponse.json(
-        { error: 'All fields are required' },
-        { status: 400 }
-      )
-    }
-
-    if (fromIdentityId === toIdentityId) {
-      return NextResponse.json(
-        { error: 'Cannot endorse yourself' },
+        { error: 'All fields are required (fromIdentityId or fromWalletAddress, toIdentityId, amountNim, transactionHash)' },
         { status: 400 }
       )
     }
@@ -27,10 +20,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const [fromIdentity, toIdentity] = await Promise.all([
-      prisma.identity.findUnique({ where: { id: fromIdentityId }, include: { user: true } }),
-      prisma.identity.findUnique({ where: { id: toIdentityId }, include: { user: true } }),
-    ])
+    // Resolve fromIdentity
+    let fromIdentity: { id: string; userId: string } | null = null
+    
+    if (fromIdentityId && fromIdentityId !== 'current') {
+      fromIdentity = await prisma.identity.findUnique({ 
+        where: { id: fromIdentityId }, 
+        select: { id: true, userId: true }
+      })
+    } else if (fromWalletAddress) {
+      const user = await prisma.user.findUnique({ 
+        where: { nimiqAddress: fromWalletAddress },
+        include: { identity: { select: { id: true } } }
+      })
+      if (user?.identity) {
+        fromIdentity = { id: user.identity.id, userId: user.id }
+      }
+    }
+
+    const toIdentity = await prisma.identity.findUnique({ 
+      where: { id: toIdentityId }, 
+      select: { id: true, userId: true }
+    })
 
     if (!fromIdentity || !toIdentity) {
       return NextResponse.json(
@@ -39,9 +50,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (fromIdentity.id === toIdentity.id) {
+      return NextResponse.json(
+        { error: 'Cannot endorse yourself' },
+        { status: 400 }
+      )
+    }
+
     const existingEndorsement = await prisma.endorsement.findFirst({
       where: {
-        fromIdentityId,
+        fromIdentityId: fromIdentity.id,
         toIdentityId,
         transactionHash,
       }
@@ -56,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     const endorsement = await prisma.endorsement.create({
       data: {
-        fromIdentityId,
+        fromIdentityId: fromIdentity.id,
         toIdentityId,
         fromUserId: fromIdentity.userId,
         toUserId: toIdentity.userId,
@@ -69,7 +87,7 @@ export async function POST(request: NextRequest) {
       data: {
         identityId: toIdentityId,
         userId: toIdentity.userId,
-        actorIdentityId: fromIdentityId,
+        actorIdentityId: fromIdentity.id,
         type: 'RECEIVE_ENDORSEMENT',
         points: 3,
         transactionHash,
@@ -78,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.reputationEvent.create({
       data: {
-        identityId: fromIdentityId,
+        identityId: fromIdentity.id,
         userId: fromIdentity.userId,
         actorIdentityId: toIdentityId,
         type: 'SEND_ENDORSEMENT',

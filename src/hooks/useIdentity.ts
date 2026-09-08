@@ -285,16 +285,24 @@ export function useEndorsements() {
     fromIdentityId: string,
     toIdentityId: string,
     amountNim: number,
-    transactionHash: string
+    transactionHash: string,
+    fromWalletAddress?: string
   ) => {
     setIsLoading(true)
     setError(null)
     
     try {
+      const body: Record<string, any> = { toIdentityId, amountNim, transactionHash }
+      if (fromWalletAddress) {
+        body.fromWalletAddress = fromWalletAddress
+      } else {
+        body.fromIdentityId = fromIdentityId
+      }
+      
       const response = await fetch('/api/endorsements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fromIdentityId, toIdentityId, amountNim, transactionHash }),
+        body: JSON.stringify(body),
       })
       
       if (!response.ok) {
