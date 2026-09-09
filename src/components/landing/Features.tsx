@@ -11,7 +11,7 @@ const features = [
       </svg>
     ),
     title: 'Human-Readable Identity',
-    description: 'Replace your NQ address with a memorable <code className="font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">james.neet</code> handle. Easy to share, impossible to forget.',
+    description: 'Replace your NQ address with a memorable <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">james.neet</code> handle. Easy to share, impossible to forget.',
     link: '/app',
   },
   {
@@ -51,7 +51,7 @@ const features = [
       </svg>
     ),
     title: 'Portable Across Apps',
-    description: 'Your <code className="font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">.neet</code> reputation travels with you. Other Mini Apps can query your identity via API and recognize your contributions.',
+    description: 'Your <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">.neet</code> reputation travels with you. Other Mini Apps can query your identity via API and recognize your contributions.',
     link: '/app',
   },
   {
@@ -68,11 +68,11 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="py-24 lg:py-32 bg-background/50">
+    <section id="features" className="py-24 lg:py-32 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-medium text-primary mb-4">Features</span>
-          <h2 className="text-4xl sm:text-5xl font-bold font-mono mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight">
             Everything you need to{' '}
             <span className="text-gradient">own your identity</span>
           </h2>
@@ -84,7 +84,7 @@ export function Features() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
             <div key={feature.title} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
-              <Card className="group overflow-hidden">
+              <Card className="group overflow-hidden card-elevated">
                 <CardContent className="p-6 md:p-8 pt-8">
                   <div className="w-12 h-12 glass rounded-xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}

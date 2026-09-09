@@ -17,19 +17,19 @@ export function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center max-w-4xl mx-auto">
-          <Badge color="accent" variant="soft" className="gap-2 mb-8 animate-fade-in">
+          <Badge variant="soft" color="accent" className="gap-2 mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             <span className="text-sm font-medium text-primary">Live on Nimiq Pay • Mini App Competition Cycle 2</span>
           </Badge>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-mono leading-[1.1] mb-6 animate-slide-up">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6 animate-slide-up tracking-tight">
             Your Identity
             <br />
             <span className="text-gradient">On Nimiq</span>
           </h1>
 
           <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '100ms' }}>
-            Claim your human-readable <code className="font-mono text-primary bg-primary/10 px-2 py-0.5 rounded">.neet</code> name.
+            Claim your human-readable <code className="text-primary bg-primary/10 px-2 py-0.5 rounded">.neet</code> name.
             Build portable reputation through real wallet activity, NIM payments & endorsements.
           </p>
 

@@ -16,7 +16,7 @@ const steps = [
   {
     number: '03',
     title: 'Claim Your Name',
-    description: 'Search for your desired handle (e.g., <code className="font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">alice</code>). If available, claim it instantly. Your <code className="font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">alice.neet</code> is now yours forever.',
+    description: 'Search for your desired handle (e.g., <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">alice</code>). If available, claim it instantly. Your <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">alice.neet</code> is now yours forever.',
   },
   {
     number: '04',
@@ -26,7 +26,7 @@ const steps = [
   {
     number: '05',
     title: 'Share & Grow',
-    description: 'Share your <code className="font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">.neet</code> profile. Others can endorse you with NIM, boosting your reputation. Your identity travels across the Nimiq ecosystem.',
+    description: 'Share your <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">.neet</code> profile. Others can endorse you with NIM, boosting your reputation. Your identity travels across the Nimiq ecosystem.',
   },
 ]
 
@@ -36,7 +36,7 @@ export function HowItWorks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-medium text-primary mb-4">How It Works</span>
-          <h2 className="text-4xl sm:text-5xl font-bold font-mono mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight">
             From wallet to{' '}
             <span className="text-gradient">identity in seconds</span>
           </h2>
@@ -56,10 +56,10 @@ export function HowItWorks() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className={`flex-shrink-0 w-full lg:w-1/2 ${index % 2 === 0 ? 'lg:pr-8' : 'lg:pl-8'}`}>
-                  <Card className="h-full">
+                  <Card className="h-full card-elevated">
                     <CardContent className="p-6 md:p-8">
                       <div className="flex items-center gap-3 mb-4">
-                        <span className="text-3xl font-bold font-mono text-primary/20">{step.number}</span>
+                        <span className="text-3xl font-bold text-primary/20">{step.number}</span>
                         <h3 className="text-2xl font-bold">{step.title}</h3>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
@@ -70,7 +70,7 @@ export function HowItWorks() {
                 </div>
 
                 <div className={`flex-shrink-0 w-full lg:w-1/2 flex items-center justify-center ${index % 2 === 0 ? 'lg:pl-8' : 'lg:pr-8'}`}>
-                  <Card className="relative w-full max-w-md aspect-square overflow-hidden">
+                  <Card className="relative w-full max-w-md aspect-square overflow-hidden card-elevated">
                     <CardContent className="p-0 h-full flex items-center justify-center">
                       <StepVisual step={step.number} />
                     </CardContent>
@@ -111,8 +111,8 @@ function StepVisual({ step }: { step: string }) {
       <div className="text-center p-8">
         <div className="w-full max-w-xs mx-auto glass rounded-xl p-4">
           <div className="flex gap-2 mb-2">
-            <input type="text" placeholder="alice" className="flex-1 glass border-none px-3 py-2 rounded-lg font-mono text-center" disabled />
-            <span className="flex items-center px-3 text-muted-foreground font-mono">.neet</span>
+            <input type="text" placeholder="alice" className="flex-1 glass border-none px-3 py-2 rounded-lg text-center" disabled />
+            <span className="flex items-center px-3 text-muted-foreground">.neet</span>
           </div>
           <Button variant="primary" className="w-full" isDisabled>Claim alice.neet</Button>
         </div>
@@ -146,16 +146,16 @@ function StepVisual({ step }: { step: string }) {
       <div className="text-center p-8">
         <div className="w-full max-w-xs mx-auto glass rounded-xl p-4">
           <div className="flex items-center gap-3 mb-4">
-            <Avatar size="lg" className="bg-primary/20 text-primary">A</Avatar>
+            <Avatar size="lg" className="bg-primary/15 text-primary">A</Avatar>
             <div className="text-left">
-              <div className="font-mono font-medium">alice.neet</div>
+              <div className="font-medium font-mono">alice.neet</div>
               <div className="text-sm text-primary">+0.1 NIM endorsement</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Avatar size="lg" className="bg-primary/20 text-primary">J</Avatar>
+            <Avatar size="lg" className="bg-primary/15 text-primary">J</Avatar>
             <div className="text-left">
-              <div className="font-mono font-medium">james.neet</div>
+              <div className="font-medium font-mono">james.neet</div>
               <div className="text-sm text-muted-foreground">Rep: 43 → 48</div>
             </div>
           </div>

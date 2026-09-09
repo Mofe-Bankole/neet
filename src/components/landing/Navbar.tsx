@@ -18,9 +18,9 @@ export function Navbar() {
   }, [])
 
   const navStyle = {
-    background: scrolled ? 'rgba(22, 22, 40, 0.9)' : 'transparent',
+    background: scrolled ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
     backdropFilter: scrolled ? 'blur(20px)' : 'none',
-    borderBottom: scrolled ? '1px solid rgba(45, 45, 68, 0.6)' : 'none',
+    borderBottom: scrolled ? '1px solid var(--border)' : 'none',
     transition: 'all 0.3s ease',
   }
 
@@ -29,7 +29,7 @@ export function Navbar() {
       <header style={navStyle} className="fixed top-0 left-0 right-0 z-50">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-2xl font-mono font-bold text-primary">.neet</Link>
+            <Link href="/" className="text-2xl font-bold text-primary tracking-tight">.neet</Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</Link>
               <Link href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How it Works</Link>
@@ -46,7 +46,7 @@ export function Navbar() {
     <header style={navStyle} className="fixed top-0 left-0 right-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-2xl font-mono font-bold text-primary">.neet</Link>
+          <Link href="/" className="text-2xl font-bold text-primary tracking-tight">.neet</Link>
 
           <div className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</Link>
@@ -60,13 +60,13 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isConnected && account && (
               <div className="flex items-center gap-3">
-<Badge color="accent" variant="primary" className="font-mono text-xs">
+                <Badge color="default" variant="primary" className="text-xs">
                   {account.network.toUpperCase()}
                 </Badge>
-                <Avatar size="sm" className="bg-primary/20 text-primary">
+                <Avatar size="sm" className="bg-primary/15 text-primary">
                   {formatNimAddress(account.address).charAt(0)}
                 </Avatar>
-                <span className="font-mono text-sm text-muted-foreground">{formatNimAddress(account.address)}</span>
+                <span className="text-sm text-muted-foreground font-mono">{formatNimAddress(account.address)}</span>
               </div>
             )}
             {!isConnected && (
@@ -121,10 +121,10 @@ export function Navbar() {
               )}
               {isConnected && account && (
                 <div className="flex items-center gap-3 px-2 py-2">
-<Badge color="accent" variant="primary" className="font-mono text-xs">
+<Badge color="default" variant="primary" className="text-xs">
                     {account.network.toUpperCase()}
                   </Badge>
-                  <span className="font-mono text-sm text-muted-foreground">{formatNimAddress(account.address)}</span>
+                  <span className="text-sm text-muted-foreground font-mono">{formatNimAddress(account.address)}</span>
                 </div>
               )}
             </div>
