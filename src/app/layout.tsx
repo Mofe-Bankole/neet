@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { HeroUIProviderWrapper } from '@/components/HeroUIProvider'
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -37,7 +38,9 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
       lang="en"
       className={`${poppins.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">{children}</body>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <HeroUIProviderWrapper>{children}</HeroUIProviderWrapper>
+      </body>
     </html>
   );
 }
