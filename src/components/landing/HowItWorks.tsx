@@ -1,5 +1,7 @@
 'use client'
 
+import { Card, CardContent, Badge, Avatar, Button } from '@/components/ui'
+
 const steps = [
   {
     number: '01',
@@ -54,25 +56,25 @@ export function HowItWorks() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className={`flex-shrink-0 w-full lg:w-1/2 ${index % 2 === 0 ? 'lg:pr-8' : 'lg:pl-8'}`}>
-                  <div className="glass-strong p-6 md:p-8 rounded-2xl h-full">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-3xl font-bold font-mono text-primary/20">{step.number}</span>
-                      <h3 className="text-2xl font-bold">{step.title}</h3>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {step.description}
-                    </p>
-                  </div>
+                  <Card className="h-full">
+                    <CardContent className="p-6 md:p-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-3xl font-bold font-mono text-primary/20">{step.number}</span>
+                        <h3 className="text-2xl font-bold">{step.title}</h3>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {step.description}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <div className={`flex-shrink-0 w-full lg:w-1/2 flex items-center justify-center ${index % 2 === 0 ? 'lg:pl-8' : 'lg:pr-8'}`}>
-                  <div className="relative w-full max-w-md aspect-square">
-                    <div className="absolute inset-0 glass-strong rounded-2xl border-2 border-primary/30" />
-                    <div className="absolute inset-0 glass-strong rounded-2xl" style={{ transform: 'translate(8px, 8px)' }} />
-                    <div className="relative glass-strong rounded-2xl h-full flex items-center justify-center">
+                  <Card className="relative w-full max-w-md aspect-square overflow-hidden">
+                    <CardContent className="p-0 h-full flex items-center justify-center">
                       <StepVisual step={step.number} />
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             ))}
@@ -86,7 +88,7 @@ export function HowItWorks() {
 function StepVisual({ step }: { step: string }) {
   const visuals: Record<string, React.ReactNode> = {
     '01': (
-      <div className="text-center">
+      <div className="text-center p-8">
         <div className="w-20 h-20 mx-auto mb-4 glass rounded-2xl flex items-center justify-center">
           <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -96,7 +98,7 @@ function StepVisual({ step }: { step: string }) {
       </div>
     ),
     '02': (
-      <div className="text-center">
+      <div className="text-center p-8">
         <div className="w-20 h-20 mx-auto mb-4 glass rounded-2xl flex items-center justify-center">
           <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -106,18 +108,18 @@ function StepVisual({ step }: { step: string }) {
       </div>
     ),
     '03': (
-      <div className="text-center">
+      <div className="text-center p-8">
         <div className="w-full max-w-xs mx-auto glass rounded-xl p-4">
           <div className="flex gap-2 mb-2">
             <input type="text" placeholder="alice" className="flex-1 glass border-none px-3 py-2 rounded-lg font-mono text-center" disabled />
             <span className="flex items-center px-3 text-muted-foreground font-mono">.neet</span>
           </div>
-          <button className="btn btn-primary w-full" disabled>Claim alice.neet</button>
+          <Button variant="primary" className="w-full" isDisabled>Claim alice.neet</Button>
         </div>
       </div>
     ),
     '04': (
-      <div className="text-center">
+      <div className="text-center p-8">
         <div className="w-full max-w-xs mx-auto glass rounded-xl p-4">
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="glass p-3 rounded-lg text-center">
@@ -134,24 +136,24 @@ function StepVisual({ step }: { step: string }) {
             </div>
           </div>
           <div className="flex gap-2">
-            <span className="badge badge-success">Verified Wallet</span>
-            <span className="badge badge-primary">Early Builder</span>
+            <Badge color="success" variant="primary">Verified Wallet</Badge>
+            <Badge color="accent" variant="primary">Early Builder</Badge>
           </div>
         </div>
       </div>
     ),
     '05': (
-      <div className="text-center">
+      <div className="text-center p-8">
         <div className="w-full max-w-xs mx-auto glass rounded-xl p-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 glass rounded-full flex items-center justify-center font-bold text-primary">A</div>
+            <Avatar size="lg" className="bg-primary/20 text-primary">A</Avatar>
             <div className="text-left">
               <div className="font-mono font-medium">alice.neet</div>
               <div className="text-sm text-primary">+0.1 NIM endorsement</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 glass rounded-full flex items-center justify-center font-bold text-primary">J</div>
+            <Avatar size="lg" className="bg-primary/20 text-primary">J</Avatar>
             <div className="text-left">
               <div className="font-mono font-medium">james.neet</div>
               <div className="text-sm text-muted-foreground">Rep: 43 → 48</div>

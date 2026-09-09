@@ -1,5 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+import { Card, CardContent } from '@/components/ui'
+
 const features = [
   {
     icon: (
@@ -80,28 +83,28 @@ export function Features() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <article
-              key={feature.title}
-              className="glass-strong p-6 md:p-8 rounded-2xl group animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="w-12 h-12 glass rounded-xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-300">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                {feature.description}
-              </p>
-              <a
-                href={feature.link}
-                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover transition-colors group"
-              >
-                Learn more
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </a>
-            </article>
+            <div key={feature.title} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+              <Card className="group overflow-hidden">
+                <CardContent className="p-6 md:p-8 pt-8">
+                  <div className="w-12 h-12 glass rounded-xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-300">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-6">
+                    {feature.description}
+                  </p>
+                  <Link
+                    href={feature.link}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover transition-colors group"
+                  >
+                    Learn more
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
