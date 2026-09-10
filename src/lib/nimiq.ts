@@ -1,3 +1,5 @@
+import { init, NimiqProvider, NimiqPayHostContext } from '@nimiq/mini-app-sdk'
+
 export interface NimiqWalletInfo {
   address: string
   network: 'mainnet' | 'testnet' | 'devnet'
@@ -17,57 +19,86 @@ export interface NimiqEndorsementParams {
 
 declare global {
   interface Window {
-    nimiq?: {
-      connect: () => Promise<NimiqWalletInfo>
-      disconnect: () => Promise<void>
-      getAccount: () => Promise<NimiqWalletInfo | null>
-      signMessage: (message: string) => Promise<string>
-      sendTransaction: (params: NimiqEndorsementParams) => Promise<NimiqPaymentResult>
-      onAccountChange: (callback: (account: NimiqWalletInfo | null) => void) => () => void
-      onNetworkChange: (callback: (network: string) => void) => () => void
-    }
+    nimiq?: NimiqProvider
+    nimiqPay?: NimiqPayHostContext
   }
+}
+
+interface ErrorResponse {
+  error: { type: string; message: string }
+}
+
+let nimiqProviderPromise: Promise<NimiqProvider> | null = null
+
+export async function initializeNimiqProvider(): Promise<NimiqProvider> {
+  if (nimiqProviderPromise) return nimiqProviderPromise
+
+  if (typeof window === 'undefined') {
+    throw new Error('Window not available')
+  }
+
+  nimiqProviderPromise = init({ timeout: 10_000 })
+    .then((nimiq) => {
+      if (!nimiq) {
+        throw new Error('Nimiq provider initialization returned null')
+      }
+      return nimiq
+    })
+    .catch((error) => {
+      nimiqProviderPromise = null
+      throw error
+    })
+
+  return nimiqProviderPromise
 }
 
 export function isNimiqPayAvailable(): boolean {
   return typeof window !== 'undefined' && !!window.nimiq
 }
 
-export async function connectNimiqWallet(): Promise<NimiqWalletInfo | null> {
-  if (!isNimiqPayAvailable()) {
-    throw new Error('Nimiq Pay not available. Please open this app inside Nimiq Pay.')
+export async function connectNimiqWallet(): Promise<string[]> {
+  const nimiq = await initializeNimiqProvider()
+  await nimiq.connect()
+  const accounts = await nimiq.listAccounts()
+  if (isErrorResponse(accounts)) {
+    throw new Error(accounts.error.message)
   }
-  
-  try {
-    const account = await window.nimiq!.connect()
-    return account
-  } catch (error) {
-    console.error('Failed to connect Nimiq wallet:', error)
-    throw error
-  }
+  return accounts
 }
 
 export async function getNimiqAccount(): Promise<NimiqWalletInfo | null> {
-  if (!isNimiqPayAvailable()) {
-    return null
-  }
-  
   try {
-    return await window.nimiq!.getAccount()
-  } catch (error) {
-    console.error('Failed to get Nimiq account:', error)
+    const nimiq = await initializeNimiqProvider()
+    const accounts = await nimiq.listAccounts()
+    if (isErrorResponse(accounts) || accounts.length === 0) {
+      return null
+    }
+    return { address: accounts[0], network: 'testnet' }
+  } catch {
     return null
   }
 }
 
-export async function sendNimPayment(params: NimiqEndorsementParams): Promise<NimiqPaymentResult> {
-  if (!isNimiqPayAvailable()) {
-    throw new Error('Nimiq Pay not available')
-  }
-  
+function isErrorResponse(value: unknown): value is { error: { type: string; message: string } } {
+  return typeof value === 'object' && value !== null && 'error' in value
+}
+
+export async function sendNimPayment(params: { toAddress: string; amountNim: number; memo?: string }): Promise<{ success: boolean; transactionHash?: string; error?: string }> {
   try {
-    const result = await window.nimiq!.sendTransaction(params)
-    return result
+    const nimiq = await initializeNimiqProvider()
+    
+    const value = Math.round(params.amountNim * 100_000)
+    
+    const txHash = await nimiq.sendBasicTransaction({
+      recipient: params.toAddress,
+      value,
+    })
+    
+    if (isErrorResponse(txHash)) {
+      return { success: false, error: txHash.error.message }
+    }
+    
+    return { success: true, transactionHash: txHash }
   } catch (error) {
     console.error('Failed to send NIM payment:', error)
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
@@ -75,25 +106,36 @@ export async function sendNimPayment(params: NimiqEndorsementParams): Promise<Ni
 }
 
 export async function signMessage(message: string): Promise<string> {
-  if (!isNimiqPayAvailable()) {
-    throw new Error('Nimiq Pay not available')
+  const nimiq = await initializeNimiqProvider()
+  const result = await nimiq.sign(message)
+  if (isErrorResponse(result)) {
+    throw new Error(result.error.message)
   }
-  
-  return window.nimiq!.signMessage(message)
+  return result.signature
 }
 
-export function onAccountChange(callback: (account: NimiqWalletInfo | null) => void): () => void {
-  if (isNimiqPayAvailable()) {
-    return window.nimiq!.onAccountChange(callback)
+export async function listNimiqAccounts(): Promise<string[]> {
+  const nimiq = await initializeNimiqProvider()
+  const accounts = await nimiq.listAccounts()
+  if (isErrorResponse(accounts)) {
+    throw new Error(accounts.error.message)
   }
-  return () => {}
+  return accounts
 }
 
-export function onNetworkChange(callback: (network: string) => void): () => void {
-  if (isNimiqPayAvailable()) {
-    return window.nimiq!.onNetworkChange(callback)
-  }
-  return () => {}
+export async function checkConsensus(): Promise<boolean> {
+  const nimiq = await initializeNimiqProvider()
+  return nimiq.isConsensusEstablished()
+}
+
+export async function getBlockNumber(): Promise<number> {
+  const nimiq = await initializeNimiqProvider()
+  return nimiq.getBlockNumber()
+}
+
+export function getNimiqPayLanguage(): string | null {
+  if (typeof window === 'undefined') return null
+  return window.nimiqPay?.language ?? null
 }
 
 export function formatNimAddress(address: string): string {

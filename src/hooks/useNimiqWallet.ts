@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { 
   isNimiqPayAvailable, 
   connectNimiqWallet, 
   getNimiqAccount,
-  onAccountChange,
-  onNetworkChange,
+  initializeNimiqProvider,
   NimiqWalletInfo
 } from '@/lib/nimiq'
 
@@ -15,6 +14,11 @@ export function useNimiqWallet() {
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isAvailable, setIsAvailable] = useState(false)
+  
+  const providerRef = useRef<{ 
+    on: (event: string, callback: (...args: unknown[]) => void) => void
+    off: (event: string, callback: (...args: unknown[]) => void) => void
+  } | null>(null)
 
   useEffect(() => {
     const available = isNimiqPayAvailable()
@@ -22,18 +26,26 @@ export function useNimiqWallet() {
 
     if (available) {
       getNimiqAccount().then(setAccount).catch(console.error)
-      
-      const unsubscribeAccount = onAccountChange((newAccount) => {
-        setAccount(newAccount)
-      })
 
-      const unsubscribeNetwork = onNetworkChange((network) => {
-        console.log('Network changed:', network)
-      })
+      // Initialize provider and set up event listeners
+      initializeNimiqProvider()
+        .then((provider) => {
+          providerRef.current = provider
+          provider.on('accountChange', (newAccount: NimiqWalletInfo | null) => {
+            setAccount(newAccount)
+          })
+          provider.on('networkChange', (network: string) => {
+            console.log('Network changed:', network)
+          })
+        })
+        .catch(console.error)
 
       return () => {
-        unsubscribeAccount()
-        unsubscribeNetwork()
+        if (providerRef.current) {
+          providerRef.current.off('accountChange', () => {})
+          providerRef.current.off('networkChange', () => {})
+          providerRef.current = null
+        }
       }
     }
   }, [])
@@ -48,8 +60,10 @@ export function useNimiqWallet() {
     setError(null)
 
     try {
-      const newAccount = await connectNimiqWallet()
-      setAccount(newAccount)
+      const accounts = await connectNimiqWallet()
+      if (accounts.length > 0) {
+        setAccount({ address: accounts[0], network: 'testnet' })
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect wallet')
     } finally {
