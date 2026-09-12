@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  nimiqAddress  String    @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  identity      Identity?
+  endorsementsSent     Endorsement[] @relation("SentEndorsements")
+  endorsementsReceived Endorsement[] @relation("ReceivedEndorsements")
+  reputationEvents     ReputationEvent[]
+}
+
+model Identity {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  handle      String   @unique
+  fullHandle  String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  profile     Profile?
+  posts       Post[]
+  reputationEvents ReputationEvent[]
+  sentEndorsements Endorsement[] @relation("SentEndorsements")
+  receivedEndorsements Endorsement[] @relation("ReceivedEndorsements")
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  identityId   String   @unique
+  identity     Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  displayName  String?
+  bio          String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  identityId  String
+  identity    Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([identityId])
+}
+
+model ReputationEvent {
+  id                 String   @id @default(cuid())
+  identityId         String
+  identity           Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actorIdentityId    String?
+  type               String
+  points             Int
+  transactionHash    String?
+  createdAt          DateTime @default(now())
+
+  @@index([identityId])
+  @@index([actorIdentityId])
+  @@index([userId])
+}
+
+model Endorsement {
+  id                String   @id @default(cuid())
+  fromIdentityId    String
+  fromIdentity      Identity @relation("SentEndorsements", fields: [fromIdentityId], references: [id], onDelete: Cascade)
+  toIdentityId      String
+  toIdentity        Identity @relation("ReceivedEndorsements", fields: [toIdentityId], references: [id], onDelete: Cascade)
+  fromUserId        String
+  fromUser          User     @relation("SentEndorsements", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId          String
+  toUser            User     @relation("ReceivedEndorsements", fields: [toUserId], references: [id], onDelete: Cascade)
+  amountNim         Float
+  transactionHash   String
+  createdAt         DateTime @default(now())
+
+  @@index([fromIdentityId])
+  @@index([toIdentityId])
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+// V1 contribution records are isolated from unverified legacy reputation data.
+model WalletProfile {
+  id String @id @default(cuid())
+  network String
+  address String
+  handle String
+  displayName String?
+  bio String?
+  verifiedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sent ContributionReceipt[] @relation("ReceiptIssuer")
+  received ContributionReceipt[] @relation("ReceiptRecipient")
+  @@unique([network, address])
+  @@unique([network, handle])
+}
+
+model AuthChallenge {
+  id String @id @default(cuid())
+  network String
+  address String
+  message String
+  bindingHash String
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+
+model WalletSession {
+  id String @id @default(cuid())
+  tokenHash String @unique
+  address String
+  network String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+
+model ContributionReceipt {
+  id String @id @default(cuid())
+  network String
+  issuerId String
+  issuer WalletProfile @relation("ReceiptIssuer",fields:[issuerId],references:[id])
+  recipientId String
+  recipient WalletProfile @relation("ReceiptRecipient",fields:[recipientId],references:[id])
+  issuerAddress String
+  recipientAddress String
+  amountLuna BigInt
+  statement String
+  evidenceUrl String?
+  idempotencyKey String
+  paymentState String @default("DRAFT")
+  paymentAttemptAt DateTime?
+  paymentAttemptId String?
+  transactionHash String?
+  paymentVerifiedAt DateTime?
+  paymentBlock Int?
+  confirmationCount Int?
+  verificationPolicy String?
+  acknowledgmentMessage String?
+  acknowledgmentExpiresAt DateTime?
+  acknowledgmentPublicKey String?
+  acknowledgmentSignature String?
+  signatureVerifiedAt DateTime?
+  publishedAt DateTime?
+  withdrawnAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([network, transactionHash])
+  @@unique([issuerId, idempotencyKey])
+  @@index([recipientId, publishedAt])
+  @@index([issuerId, createdAt])
+}
+
+model RateLimitBucket {
+  key String @id
+  count Int
+  resetAt DateTime
+  @@index([resetAt])
+}
