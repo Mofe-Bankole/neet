@@ -1,3 +1,5 @@
+'use client';
+
 import {
   PageShell,
   PageIntro,
@@ -7,8 +9,35 @@ import {
   SampleReceipt,
   ActionLink,
   Card,
+  ToastProvider,
+  useToast,
 } from '@/components/system';
 import { Field, TextField } from '@/components/forms';
+
+function ToastDemoInner() {
+  const { showToast } = useToast();
+  return (
+    <div className="actions" style={{ flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+      <Button variant="primary" onClick={() => showToast('Profile saved successfully!', 'success')}>
+        Show Success
+      </Button>
+      <Button variant="danger" onClick={() => showToast('Failed to verify signature. Please try again.', 'error')}>
+        Show Error
+      </Button>
+      <Button variant="secondary" onClick={() => showToast('This is a testnet environment. No real funds are used.', 'info')}>
+        Show Info
+      </Button>
+    </div>
+  );
+}
+
+function ToastDemo() {
+  return (
+    <ToastProvider>
+      <ToastDemoInner />
+    </ToastProvider>
+  );
+}
 
 export default function Page() {
   return (
@@ -201,7 +230,7 @@ export default function Page() {
                 />
               </div>
             </Card>
-            <Card>
+<Card>
               <h3>Handle input</h3>
               <p className="small" style={{ marginBottom: 'var(--space-4)' }}>
                 Normalizes to lowercase, strips .neet suffix, validates format.
@@ -226,12 +255,21 @@ export default function Page() {
                 <div style={{ flex: 1, minWidth: '200px' }}>
                   <Field
                     id="handle-checking"
-                    label="Checking…"
+                    label="Checking&hellip;"
                     value="test"
-                    hint="Checking availability…"
+                    hint="Checking availability&hellip;"
                   />
                 </div>
               </div>
+            </Card>
+          </div>
+          <div className="stack">
+            <Card>
+              <h3>Toast notifications</h3>
+              <p className="small" style={{ marginBottom: 'var(--space-4)' }}>
+                Global toast system with success (lime), error (red), info (yellow). Auto-dismisses after 5s.
+              </p>
+              <ToastDemo />
             </Card>
           </div>
         </div>

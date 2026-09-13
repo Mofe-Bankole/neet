@@ -1,5 +1,7 @@
+'use client';
 import Link from 'next/link';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 
 export function ArrowIcon({ className = '', ...props }: React.SVGProps<SVGSVGElement>) {
   return (
@@ -292,13 +294,42 @@ export function Header({ active }: HeaderProps) {
 export function Footer() {
   return (
     <footer className="site-footer" role="contentinfo">
-      <div>Built for the people building on Nimiq.</div>
-      <div className="links">
-        <Link href="/api">Developer reference</Link>
-        <a href="https://github.com/Mofe-Bankole/neet" target="_blank" rel="noreferrer">
-          Original source
-        </a>
-        <Link href="/design-system">Design system</Link>
+      <div className="footer-grid">
+        <div className="footer-brand">
+          <Link href="/" className="wordmark" aria-label="Dotneet home">
+            <span>.</span>neet
+          </Link>
+          <p className="footer-tagline">Get paid. Keep the proof.</p>
+          <p className="footer-copyright">Built for the people building on Nimiq.</p>
+        </div>
+        <nav className="footer-nav" aria-label="Footer navigation">
+          <div className="footer-nav-group">
+            <h4>Product</h4>
+            <ul>
+              <li><Link href="/app">Your workspace</Link></li>
+              <li><Link href="/preview">Explore sample</Link></li>
+              <li><Link href="/design-system">Design system</Link></li>
+            </ul>
+          </div>
+          <div className="footer-nav-group">
+            <h4>Developers</h4>
+            <ul>
+              <li><Link href="/api">API reference</Link></li>
+              <li><a href="https://github.com/Mofe-Bankole/neet" target="_blank" rel="noreferrer">GitHub repository</a></li>
+            </ul>
+          </div>
+          <div className="footer-nav-group">
+            <h4>Resources</h4>
+            <ul>
+              <li><Link href="/acknowledge">Acknowledge</Link></li>
+              <li><a href="https://nimiq.com" target="_blank" rel="noreferrer">Nimiq</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+      <div className="footer-bottom">
+        <p>Dotneet is an independent product using Nimiq. No institutional endorsement implied.</p>
+        <p className="footer-legal">Testnet only · No real funds · No production deployment</p>
       </div>
     </footer>
   );
@@ -311,13 +342,13 @@ export interface PageShellProps {
 
 export function PageShell({ children, active }: PageShellProps) {
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Header active={active} />
-      <main id="main" className="container page-wrap">
+      <main id="main" className="container page-wrap flex-1">
         {children}
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
 
@@ -456,4 +487,111 @@ export function Separator({ className = '', text }: SeparatorProps) {
     );
   }
   return <hr className={`border-border-subtle ${className}`} />;
+}
+
+export interface ToastProps {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+  onClose: (id: string) => void;
+}
+
+export function Toast({ id, message, type, onClose }: ToastProps) {
+  const typeStyles = {
+    success: 'bg-status-success-bg border-status-success-border text-status-success-text',
+    error: 'bg-status-danger-bg border-status-danger-border text-status-danger-text',
+    info: 'bg-status-pending-bg border-status-pending-border text-status-pending-text',
+  };
+
+  const icons = {
+    success: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <circle cx="10" cy="10" r="8" />
+        <path d="m6 10 2.5 2.5L14 7" />
+      </svg>
+    ),
+    error: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <circle cx="10" cy="10" r="8" />
+        <path d="M10 6v8M10 16h.01" />
+      </svg>
+    ),
+    info: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <circle cx="10" cy="10" r="8" />
+        <path d="M10 6v8M10 16h.01" />
+      </svg>
+    ),
+  };
+
+  return (
+    <div
+      className={`flex items-start gap-3 p-4 rounded-xl border animate-slide-in ${typeStyles[type]}`}
+      role={type === 'error' ? 'alert' : 'status'}
+      style={{ minWidth: '320px', maxWidth: '480px', boxShadow: 'var(--shadow-xl)' }}
+    >
+      <div className="flex-shrink-0 mt-0.5" aria-hidden="true">
+        {icons[type]}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium leading-relaxed">{message}</p>
+      </div>
+      <button
+        onClick={() => onClose(id)}
+        className="flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-colors"
+        aria-label="Dismiss notification"
+      >
+        <CloseIcon width="16" height="16" />
+      </button>
+    </div>
+  );
+}
+
+export interface ToastProviderProps {
+  children: ReactNode;
+}
+
+interface ToastContextType {
+  toasts: Array<{ id: string; message: string; type: 'success' | 'error' | 'info' }>;
+  showToast: (message: string, type: 'success' | 'error' | 'info') => void;
+  dismissToast: (id: string) => void;
+}
+
+const ToastContext = createContext<ToastContextType | null>(null);
+
+export function ToastProvider({ children }: ToastProviderProps) {
+  const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: 'success' | 'error' | 'info' }>>([]);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    const id = crypto.randomUUID?.() || Math.random().toString(36).slice(2);
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5000);
+  }, []);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  return (
+    <ToastContext.Provider value={{ toasts, showToast, dismissToast }}>
+      {children}
+      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none" aria-live="polite" aria-atomic="true">
+        {toasts.map(toast => (
+          <div key={toast.id} className="pointer-events-auto">
+            <Toast id={toast.id} message={toast.message} type={toast.type} onClose={dismissToast} />
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
 }
