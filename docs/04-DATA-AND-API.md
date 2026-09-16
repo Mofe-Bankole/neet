@@ -54,7 +54,7 @@ Amount source of truth is integer Luna. `amountNim` input is a decimal string wi
 Fields: hashed `key` primary key, `count`, `resetAt`. Reset time indexed. Raw SQL atomically inserts/increments or resets expired counters, so controls operate across server instances sharing the database. These are per-action global/address/record limits, not an IP analytics system. Expired row cleanup is an operations task.
 
 ## HTTP rules
-
+;
 JSON request bodies are objects limited to 12,000 bytes. Protected mutations require exact `Origin: APP_ORIGIN` and a valid session cookie; challenge/verify also require the initiating browser cookie binding. Responses use `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`. Public v1 GET/OPTIONS allow noncredentialed CORS `*`; private writes are same-origin.
 
 Errors use `{ "error": { "code": "...", "message": "..." } }`. Notable codes include `UNAUTHENTICATED` 401, `ORIGIN_REJECTED` 403, `NOT_FOUND` 404, `CONFLICT` 409, `RATE_LIMITED` 429, `RPC_UNAVAILABLE` 503. Pending verification deliberately returns **HTTP 202 with an error-shaped `PAYMENT_PENDING` body**; clients must inspect payloads, not treat every `response.ok` as verified success.

@@ -151,6 +151,48 @@ code,
     padding: 0 var(--space-4);
   }
 }
+.hamburger {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+}
+@media (max-width: 760px) {
+  .hamburger {
+    display: block;
+  }
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  height: 100%;
+  @media (max-width: 760px) {
+    position: fixed;
+    top: var(--header-height-mobile);
+    left: 0;
+    right: 0;
+    background: var(--surface-base);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-8) var(--space-6);
+    gap: var(--space-4);
+    max-height: calc(100vh - var(--header-height-mobile));
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform var(--motion-fast);
+    &--open {
+      transform: translateX(0);
+    }
+    /* When body has data-mobile-menu=1, show the menu by default on load */
+    [data-mobile-menu="1"] & {
+      transform: translateX(0);
+    }
+  }
+}
 .wordmark {
   font-family: var(--font-display);
   font-size: var(--text-3xl);
@@ -602,7 +644,7 @@ code,
   font-size: var(--text-lg);
 }
 .site-footer {
-  padding: var(--space-16) 0 var(--space-8);
+  padding: var(--space-20) var(--space-8) var(--space-12);
   background: var(--surface-panel);
   border-top: 1px solid var(--border-subtle);
   margin-top: auto;
@@ -611,14 +653,19 @@ code,
 .footer-grid {
   display: grid;
   grid-template-columns: 1.5fr 2fr;
-  gap: var(--space-12);
-  margin-bottom: var(--space-12);
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--space-8);
 }
 
 @media (max-width: 760px) {
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-10);
+    gap: var(--space-12);
+    padding: 0 var(--space-6);
   }
 }
 
@@ -688,13 +735,22 @@ code,
 }
 
 .footer-bottom {
-  padding-top: var(--space-8);
+  padding: var(--space-12) var(--space-8);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-4);
   text-align: center;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 760px) {
+  .footer-bottom {
+    padding: var(--space-8) var(--space-4);
+  }
 }
 
 .footer-bottom p {

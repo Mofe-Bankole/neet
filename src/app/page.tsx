@@ -32,7 +32,59 @@ export default function Home() {
           </div>
         </section>
 
-        <div className="principles" role="list" aria-label="Core principles">
+        <section className="onboarding" aria-labelledby="onboarding-heading">
+          <h2 id="onboarding-heading" className="section-heading">
+            Your 3-step workflow
+          </h2>
+          <p className="onboarding-subtitle">
+            1. Claim your .neet name · 2. Receive a contribution payment · 3. Publish your receipt
+          </p>
+          <div className="onboarding-steps">
+            {[
+
+              [
+
+                '01',
+
+                'Claim your name',
+
+                'Start with a memorable .neet name linked to your wallet you control. Your profile becomes a home for your contributions.',
+
+              ],
+
+              [
+
+                '02',
+
+                'Receive payment',
+
+                'A builder pays in NIM and signs a description of your help. An issue, document or other link adds context.',
+
+              ],
+
+              [
+
+                '03',
+
+                'Publish your work',
+
+                'Choose which receipts to publish. Share your profile when the next opportunity comes along.',
+
+              ],
+
+            ].map(([number, title, text]) => (
+
+              <article className="onboarding-step" key={number} role="listitem">
+                <div className="step-number">{number}</div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+
+            ))}
+          </div>
+        </section>
+
+        <section className="principles" role="list" aria-label="Core principles">
           <div className="principle" role="listitem">
             <span className="mono accent">01</span>
             <p>
@@ -54,7 +106,7 @@ export default function Home() {
               Share your work beyond the original chat. Your profile is a portable record.
             </p>
           </div>
-        </div>
+        </section>
 
         <section id="how-it-works" className="section" aria-labelledby="how-heading">
           <div className="section-heading">

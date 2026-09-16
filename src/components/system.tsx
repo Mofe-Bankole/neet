@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 export function ArrowIcon({ className = '', ...props }: React.SVGProps<SVGSVGElement>) {
@@ -257,12 +257,56 @@ export interface HeaderProps {
 }
 
 export function Header({ active }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    // Close menu on resize to desktop
+    const handleResize = () => {
+      if (window.innerWidth > 760) setMenuOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  // Set body data attribute for SSR-safe mobile detection
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.body.dataset.mobileMenu = menuOpen ? '1' : '0';
+    }
+    const handleResize = () => {
+      if (window.innerWidth > 760) {
+        setMenuOpen(false);
+        if (typeof document.body !== 'undefined') {
+          document.body.dataset.mobileMenu = '0';
+        }
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [menuOpen]);
+
   return (
     <header className="site-header" role="banner">
       <Link href="/" className="wordmark" aria-label="Dotneet home">
         <span>.</span>neet
       </Link>
-      <nav className="nav-links" aria-label="Main navigation">
+      <button
+        className="hamburger"
+        aria-label="Open navigation"
+        aria-expanded={menuOpen}
+        onClick={toggleMenu}
+      >
+        <span aria-hidden="true" />
+        <span className="sr-only">Open navigation</span>
+      </button>
+      <nav
+        className={`nav-links ${
+          menuOpen ? 'nav-links--open' : ''
+        }`}
+        aria-label="Main navigation"
+      >
         <Link
           href="/#how-it-works"
           className="nav-secondary"
@@ -308,7 +352,6 @@ export function Footer() {
             <ul>
               <li><Link href="/app">Your workspace</Link></li>
               <li><Link href="/preview">Explore sample</Link></li>
-              <li><Link href="/design-system">Design system</Link></li>
             </ul>
           </div>
           <div className="footer-nav-group">
