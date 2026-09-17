@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 export function ArrowIcon({ className = '', ...props }: React.SVGProps<SVGSVGElement>) {
@@ -256,13 +256,47 @@ export interface HeaderProps {
   active?: string;
 }
 
+export interface HeaderProps {
+  active?: string;
+}
+
 export function Header({ active }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    // Close menu on resize to desktop
+    const handleResize = () => {
+      if (window.innerWidth > 760) setMenuOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
   return (
     <header className="site-header" role="banner">
       <Link href="/" className="wordmark" aria-label="Dotneet home">
         <span>.</span>neet
       </Link>
-      <nav className="nav-links" aria-label="Main navigation">
+      <button
+        className="hamburger"
+        aria-label="Open navigation"
+        aria-expanded={menuOpen}
+        onClick={toggleMenu}
+        style={{
+          display: typeof window !== 'undefined' && window.innerWidth <= 760 ? 'block' : 'none',
+        }}
+      >
+        <span aria-hidden="true" />
+        <span className="sr-only">Open navigation</span>
+      </button>
+      <nav
+        className={`nav-links ${
+          menuOpen ? 'nav-links--open' : ''
+        }`}
+        aria-label="Main navigation"
+      >
         <Link
           href="/#how-it-works"
           className="nav-secondary"
