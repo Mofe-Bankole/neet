@@ -5,7 +5,13 @@ export function config() {
     throw new AppError('CONFIGURATION', 'Unsupported network configuration.', 503);
   const origin =
     process.env.APP_ORIGIN ||
-    (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000');
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NODE_ENV === 'production'
+          ? ''
+          : 'http://localhost:3000');
   if (!origin)
     throw new AppError('CONFIGURATION', 'The application origin is not configured.', 503);
   const parsed = new URL(origin);

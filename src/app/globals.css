@@ -631,6 +631,8 @@ code,
 }
 
 .footer-grid {
+  width: min(var(--container-max), calc(100% - var(--space-10)));
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1.5fr 2fr;
   gap: var(--space-12);
@@ -639,6 +641,7 @@ code,
 
 @media (max-width: 760px) {
   .footer-grid {
+    width: calc(100% - var(--space-6));
     grid-template-columns: 1fr;
     gap: var(--space-10);
   }
