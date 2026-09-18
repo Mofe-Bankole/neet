@@ -124,7 +124,17 @@ export async function rpc(
     assert(
       response.ok,
       'RPC_UNAVAILABLE',
-      'The payment verification service is unavailable. Do not resend.',
+      (() => {
+        const reason =
+          typeof response.status === 'number'
+            ? response.status === 400 || response.status === 405
+              ? response.status + ' Method not allowed'
+              : 'HTTP ' + response.status
+            : '';
+        return reason
+          ? 'The payment verification service is unavailable (' + reason + '). Do not resend.'
+          : 'The payment verification service is unavailable. Do not resend.';
+      })(),
       503,
     );
     const wire = await response.json();
@@ -169,7 +179,18 @@ export async function rpc(
 }
 export async function checkNetwork() {
   const c = config();
-  const chain = await rpc('getNetworkId', []);
+  let chain: unknown;
+  try {
+    chain = await rpc('getNetworkId', []);
+  } catch (error) {
+    if (
+      error instanceof AppError &&
+      error.code === 'RPC_UNAVAILABLE' &&
+      /not allowed|not supported|unknown method|method not found/i.test(String(error.message))
+    )
+      return;
+    throw error;
+  }
   assert(
     chain === (c.network === 'mainnet' ? 'MainAlbatross' : 'TestAlbatross'),
     'RPC_UNAVAILABLE',
